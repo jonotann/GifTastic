@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+    <meta charset="UTF-8">
+    <title>GifTastic API Project</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB"
+        crossorigin="anonymous">
+    <link rel="stylesheet" href="giphy.css">
+
+
+
+
+</head>
+
+<body>
+    <div class="container">
+
+        <div class="buttonClass">
+            <button data-mood="happy" class="btn btn-warning">Happy</button>
+            <button data-mood="sad" class="btn btn-warning">Sad</button>
+            <button data-mood="mad" class="btn btn-warning">Mad</button>
+            <button data-mood="meh" class="btn btn-warning">Meh</button>
+            <button data-mood="money" class="btn btn-warning">Ballin'</button>
+            <div class="extraButtons">
+
+            </div>
+        </div>
+
+        <br>
+        <br>
+
+
+        <form>
+            <div class="input-group">
+                <input id="Search" type="text" class="form-control" placeholder="search">
+            </div>
+        </form>
+
+
+        <br>
+
+        <button id="search" type="submit" class="btn btn-warning" onclick="getData()">SHOW ME DEM GIF'S</button>
+
+        <br>
+
+        <div id="gifDisplay">
+
+        </div>
+
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+    <script type="text/javascript">
+        //empty array storing information passed
+        var newButtons = [];
+        //adds button to empty array 
+        function extraButtons() {
+            $("#extraButtons").empty();
+            for (var i = 0; i < newButtons.length; i++) {
+                var addButton = $("<button>");
+                addButton.addClass("btn btn-warning");
+                addButton.attr("data-mood", extraButtons[i]);
+                addButton.text(extraButtons[i]);
+                $("#extraButtons").append(addButton);
+            }
+        }
+
+        function addNewButton() {
+            $("#Search").on("click", function () {
+                var input = $("#Search").val().trim();
+                if (input == "") {
+
+                    // added so user cannot add a blank button
+                    return false;
+                }
+                newButtons.push(input);
+
+                extraButtons();
+                return false;
+            });
+        }
+
+        function getData() {
+
+            $(".Search").on("click", function () {
+                var input = $("#Search").val()
+
+                var xhr = $.get("https://api.giphy.com/v1/gifs/search?q=&api_key=dc6zaTOxFJmzC&limit=10")
+
+                xhr.done(function (response) {
+                    console.log("successful data pull", response);
+                    var jiffs = response.data
+                    for (i in jiffs) {
+                        $('#gifDisplay').append("<img src='" + jiffs[i].images.original.url + "'>'")
+                    }
+                });
+
+            });
+
+
+        }
+
+        $("button").on("click", function () {
+            //sorting property value for button data
+            var mood = $(this).attr("data-mood");
+            //making url for button value
+            var queryURL = "https://api.giphy.com/v1/gifs/search?q=" +
+                mood + "&api_key=dc6zaTOxFJmzC&limit=10";
+            //ajax request
+            $.ajax({
+                url: queryURL,
+                method: "GET"
+            })
+                //data response function
+                .then(function (response) {
+                    console.log(queryURL);
+
+                    console.log(response);
+                    //storing data from ajax request
+                    var results = response.data;
+
+                    //loop for result items
+                    for (var i = 0; i < results.length; i++) {
+                        //stores gif
+                        var moodDiv = $("<div>");
+                        //stores and writes rating
+                        var p = $("<P>").text("Rating: " + results[i].rating);
+
+                        var moodImage = $("<img>");
+
+                        moodImage.attr("src", results[i].images.fixed_height.url);
+
+                        moodDiv.append(p);
+                        moodDiv.append(moodImage);
+
+                        $("#gifDisplay").prepend(moodDiv);
+
+                    }
+                })
+
+
+        });
+    </script>
+</body>
+
+</html>
